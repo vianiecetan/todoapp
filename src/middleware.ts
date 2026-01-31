@@ -35,7 +35,10 @@ export async function middleware(request: NextRequest) {
 
   // This refreshes the session if it's expired
   const { data: { user } } = await supabase.auth.getUser();
-
+  const path = request.nextUrl.pathname;
+  if (user && path === "/") {
+    return NextResponse.redirect(new URL("/todos", request.url));
+  }
   // If no user and trying to access /dashboard or /todos, redirect to login
   if (!user && request.nextUrl.pathname.startsWith("/todos")) {
     return NextResponse.redirect(new URL("/", request.url));
