@@ -86,4 +86,7 @@ The app includes a custom middleware.ts that
 - [Tailwind CSS](https://tailwindcss.com)
 - [tRPC](https://trpc.io)
 - [T3 Stack](https://create.t3.gg/)
+- [Vercel](https://create.t3.gg/en/deployment/vercel)
 
+## Deployment
+This project is configured for one-click deployment on Vercel. Ensure all Environment Variables are added to the Vercel Dashboard settings before building.
