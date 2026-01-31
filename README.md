@@ -1,29 +1,89 @@
-# Create T3 App
+# Taskly (Todo App)
+A full-stack, real-time Task Management application built with the T3 Stack and Supabase. This project features secure authentication, image uploads, and real-time database synchronization.
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+## Features
+Standard Requirements
+User Authentication: Secure login/signup via Supabase Auth (Email).
 
-## What's next? How do I make an app with this?
+CRUD Operations: 
+- Get: Fetch user-specific tasks with tRPC queries.
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- Insert: Add tasks with title, description, and priority levels.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+- Update: Toggle completion status and edit task details inline.
 
+- Delete: Remove tasks with immediate UI feedback and backend verification.
+
+- Media Support: Upload and host images for specific tasks using Supabase Storage.
+
+## Advanced Requirements
+Real-time Updates: Utilizes Supabase Postgres Changes to reflect database updates across all clients instantly without manual refreshing.
+
+Multi-tenant Architecture: Row Level Security (RLS) ensures that users can only access, modify, or delete their own data.
+
+## Tech Stack
+Framework: Next.js 14 (App Router)
+
+Language: TypeScript
+
+Backend API: tRPC
+
+Database & Auth: Supabase
+
+Styling: Tailwind CSS + Shadcn UI
+
+## Installation & Setup
+Clone the repository: ```bash git clone https://github.com/vianiecetan/todoapp.git```
+
+Install dependencies: 
+
+```cd todoapp ``` 
+
+```bash npm install ```
+
+### Configure Environment Variables: 
+
+Create a .env file in the root directory and add your Supabase credentials
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_project_url
+
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+### Database Setup
+Run the following SQL in your Supabase SQL Editor to enable RLS
+
+```SQL 
+SQL
+-- Enable RLS
+ALTER TABLE todos ENABLE ROW LEVEL SECURITY;
+
+-- Create Policies
+CREATE POLICY "Users can view own todos" ON todos FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own todos" ON todos FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own todos" ON todos FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own todos" ON todos FOR DELETE USING (auth.uid() = user_id);
+```
+### Run the app:
+
+```bash
+npm run dev
+```
+
+## Middleware & Security
+The app includes a custom middleware.ts that
+
+- Protects the /todos route from unauthorized access.
+
+- Redirects unauthenticated users back to the landing page.
+
+- Handles server-side session refreshes to prevent "stale" logins.
+
+## Documentations
 - [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
 - [Tailwind CSS](https://tailwindcss.com)
 - [tRPC](https://trpc.io)
+- [T3 Stack](https://create.t3.gg/)
 
-## Learn More
-
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
-
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
-
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
-
-## How do I deploy this?
-
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
