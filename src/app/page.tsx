@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Correct for Next.js
+import { useRouter } from 'next/navigation'; 
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
 import { createClient } from "~/utils/supabase/client";

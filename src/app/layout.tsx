@@ -2,8 +2,7 @@ import "~/styles/globals.css";
 
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
-import { Toaster } from "sonner"; // 1. Import the Toaster
-
+import { Toaster } from "sonner"; 
 import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
