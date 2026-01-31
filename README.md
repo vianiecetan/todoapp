@@ -89,4 +89,4 @@ The app includes a custom middleware.ts that
 ## Deployment
 This project is configured for one-click deployment on Vercel. Ensure all Environment Variables are added to the Vercel Dashboard settings before building.
 
-[TODO App Deployed Link](https://todoapp-psez-l9t04tx19-vianieces-projects.vercel.app/)
+[TODO App Deployed Link](https://todoapp-54ka.vercel.app)
