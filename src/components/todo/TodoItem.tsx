@@ -16,20 +16,14 @@ import {
   DialogFooter,
 } from '~/components/ui/dialog';
 import { toast } from 'sonner';
+import type { Todo } from '~/types/todo'; // Import your Todo type
 
-// Define the local type based on your Supabase schema
 interface TodoItemProps {
-  todo: {
-    id: string;
-    task: string;
-    description?: string | null;
-    priority: 'low' | 'medium' | 'high';
-    is_completed: boolean;
-    image_url?: string | null;
-  };
+  todo: Todo; // Use your central Todo type here
   onToggle: () => void;
   onDelete: () => void;
-  onUpdate: (updates: any) => void;
+  // Replace 'any' with Partial<Todo> to fix the "Unexpected any" error
+  onUpdate: (updates: Partial<Todo>) => void; 
 }
 
 const priorityColors = {
@@ -44,14 +38,14 @@ export function TodoItem({ todo, onToggle, onDelete, onUpdate }: TodoItemProps) 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Edit State
+  // Edit State - Use ?? instead of || to fix "Prefer nullish coalescing"
   const [editTask, setEditTask] = useState(todo.task);
   const [editDescription, setEditDescription] = useState(todo.description ?? '');
   const [editPriority, setEditPriority] = useState(todo.priority);
   const [editImageUrl, setEditImageUrl] = useState(todo.image_url ?? '');
 
   const supabase = createClient();
-  const hasDetails = todo.description || todo.image_url;
+  const hasDetails = !!(todo.description ?? todo.image_url);
 
   const handleOpenEdit = () => {
     setEditTask(todo.task);
@@ -65,9 +59,9 @@ export function TodoItem({ todo, onToggle, onDelete, onUpdate }: TodoItemProps) 
     if (!editTask.trim()) return;
     onUpdate({
       task: editTask.trim(),
-      description: editDescription.trim() || null,
+      description: editDescription.trim() ?? null,
       priority: editPriority,
-      image_url: editImageUrl || null,
+      image_url: editImageUrl ?? null,
     });
     setIsEditOpen(false);
     toast.success("Task updated");
@@ -90,6 +84,8 @@ export function TodoItem({ todo, onToggle, onDelete, onUpdate }: TodoItemProps) 
       setEditImageUrl(publicUrl);
       toast.success("New image uploaded");
     } catch (err) {
+      // Log the error or use an underscore if ignored to fix "err is defined but never used"
+      console.error(err);
       toast.error("Image upload failed");
     } finally {
       setIsUploading(false);
@@ -112,7 +108,6 @@ export function TodoItem({ todo, onToggle, onDelete, onUpdate }: TodoItemProps) 
       >
         <div className="p-4">
           <div className="flex items-start gap-4">
-            {/* Custom Checkbox */}
             <button
               onClick={onToggle}
               className={cn(
@@ -123,7 +118,6 @@ export function TodoItem({ todo, onToggle, onDelete, onUpdate }: TodoItemProps) 
               {todo.is_completed && <Check className="w-4 h-4 text-white" />}
             </button>
 
-            {/* Content Area */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <div className={cn("w-2 h-2 rounded-full", priorityColors[todo.priority])} />
@@ -146,26 +140,24 @@ export function TodoItem({ todo, onToggle, onDelete, onUpdate }: TodoItemProps) 
               )}
             </div>
 
-            {/* Quick Actions */}
             <div className={cn("flex gap-1 transition-opacity", isHovered ? "opacity-100" : "opacity-0")}>
               <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={handleOpenEdit}>
                 <Pencil className="w-4 h-4" />
               </Button>
               <Button 
-  variant="ghost" 
-  size="icon" 
-  className="h-8 w-8 text-destructive hover:bg-destructive/10" 
-  onClick={(e) => {
-    e.stopPropagation(); // Prevent opening details
-    onDelete(); // This calls the mutation in page.tsx
-  }}
->
-  <Trash2 className="w-4 h-4" />
-</Button>
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-destructive hover:bg-destructive/10" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
             </div>
           </div>
 
-          {/* Details Section */}
           <AnimatePresence>
             {isExpanded && (
               <motion.div
@@ -183,7 +175,7 @@ export function TodoItem({ todo, onToggle, onDelete, onUpdate }: TodoItemProps) 
                   {todo.image_url && (
                     <img 
                       src={todo.image_url} 
-                      alt="Task" 
+                      alt={`Image for task: ${todo.task}`} // Fixed missing alt prop
                       className="rounded-lg max-h-40 w-auto object-cover border border-border shadow-sm" 
                     />
                   )}
@@ -194,7 +186,6 @@ export function TodoItem({ todo, onToggle, onDelete, onUpdate }: TodoItemProps) 
         </div>
       </motion.div>
 
-      {/* Edit Modal */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -215,6 +206,7 @@ export function TodoItem({ todo, onToggle, onDelete, onUpdate }: TodoItemProps) 
                 {(['low', 'medium', 'high'] as const).map((p) => (
                   <Button
                     key={p}
+                    type="button" // Specified button type
                     variant={editPriority === p ? "default" : "outline"}
                     className="flex-1 capitalize"
                     onClick={() => setEditPriority(p)}
@@ -228,8 +220,13 @@ export function TodoItem({ todo, onToggle, onDelete, onUpdate }: TodoItemProps) 
               <label className="text-sm font-medium">Image Attachment</label>
               {editImageUrl ? (
                 <div className="relative group">
-                  <img src={editImageUrl} className="rounded-md max-h-32 w-full object-cover" />
+                  <img 
+                    src={editImageUrl} 
+                    alt="Task preview" // Fixed missing alt prop
+                    className="rounded-md max-h-32 w-full object-cover" 
+                  />
                   <button 
+                    type="button"
                     onClick={() => setEditImageUrl('')}
                     className="absolute top-1 right-1 p-1 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                   >

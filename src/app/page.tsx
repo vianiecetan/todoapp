@@ -12,6 +12,11 @@ import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 
+//Define a custom error type or use unknown
+interface AuthError {
+  message: string;
+}
+
 type AuthMode = 'login' | 'signup';
 
 const AuthPage = () => {
@@ -46,11 +51,12 @@ const AuthPage = () => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success('Welcome back!');
-        router.push('/todos'); // Redirect to dashboard
-        router.refresh(); // Ensure middleware picks up the cookie
+        router.push('/todos'); 
+        router.refresh(); 
       }
-    } catch (error: any) {
-      toast.error(error.message || 'An error occurred during authentication');
+    } catch (error: unknown) {
+      const authError = error as AuthError;
+      toast.error(authError.message ?? 'An error occurred during authentication');
     } finally {
       setIsLoading(false);
     }
@@ -58,6 +64,7 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      {/* Sidebar - Visible on large screens */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
@@ -88,6 +95,7 @@ const AuthPage = () => {
         </div>
       </motion.div>
 
+      {/* Main Form Area */}
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
@@ -101,6 +109,7 @@ const AuthPage = () => {
             {(['login', 'signup'] as const).map((tab) => (
               <button
                 key={tab}
+                type="button"
                 onClick={() => setMode(tab)}
                 className={cn(
                   "relative flex-1 py-2.5 text-sm font-medium rounded-md transition-colors",
@@ -127,7 +136,7 @@ const AuthPage = () => {
                   <Label htmlFor="email">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" />
+                    <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
                   </div>
                 </div>
 
@@ -135,7 +144,7 @@ const AuthPage = () => {
                   <Label htmlFor="password">Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10" />
+                    <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10" required />
                   </div>
                 </div>
 

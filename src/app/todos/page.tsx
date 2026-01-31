@@ -15,16 +15,17 @@ import { EmptyState } from '~/components/todo/EmptyState';
 import { TodoStats } from '~/components/todo/TodoStats'; // Added this import
 import { Button } from '~/components/ui/button';
 import { toast } from 'sonner';
+import type { Todo } from '~/types/todo';
 
 export default function TodoPage() {
   const router = useRouter();
   const supabase = createClient();
   const utils = api.useUtils();
 
-  // 1. Data Fetching
-  const { data: todos = [], isLoading } = api.todo.getTodos.useQuery();
-
-  // 2. Mutations
+  //Fetch Data
+  const { data: todos = [] as Todo[], isLoading } = api.todo.getTodos.useQuery();
+  
+  //Mutations
   const addMutation = api.todo.addTodo.useMutation({
     onSuccess: () => {
       toast.success("Task created!");
@@ -34,13 +35,11 @@ export default function TodoPage() {
 
   const updateMutation = api.todo.updateTodo.useMutation({
     onSuccess: () => void utils.todo.getTodos.invalidate(),
-    onError: (err) => toast.error(err.message),
+    onError: (err: { message: string }) => toast.error(err.message),
   });
 
-  // 1. Simplify the mutation
 const deleteMutation = api.todo.deleteTodo.useMutation();
 
-// 2. Create the handler function
 const handleDelete = async (id: string) => {
 
   const deleteProcess = async () => {
@@ -53,11 +52,11 @@ const handleDelete = async (id: string) => {
   toast.promise(deleteProcess(), {
     loading: 'Deleting task...',
     success: 'Task deleted!',
-    error: (err) => `Error: ${err.message}`,
+    error: (err: { message: string }) => `Error: ${err.message}`,
   });
 };
 
-  // 3. Realtime Updates
+  //Realtime Updates
   useEffect(() => {
   const channel = supabase
     .channel("schema-db-changes")
@@ -77,7 +76,7 @@ const handleDelete = async (id: string) => {
   };
 }, [supabase, utils]);
 
-  // 4. State & Filtering Logic
+  //State & Filtering Logic
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'completed'>('all');
   const [priorityFilter, setPriorityFilter] = useState<'all' | 'low' | 'medium' | 'high'>('all');
 
@@ -179,9 +178,16 @@ const handleDelete = async (id: string) => {
                     updateMutation.mutate({ id: todo.id, is_completed: !todo.is_completed })
                   }
                   onDelete={() => handleDelete(todo.id)}
-                  onUpdate={(updates) => 
-                    updateMutation.mutate({ id: todo.id, ...updates })
-                  }
+                 onUpdate={(updates: Partial<Todo>) => 
+  updateMutation.mutate({ 
+    id: todo.id, 
+    task: updates.task ?? todo.task, 
+    is_completed: updates.is_completed ?? todo.is_completed,
+    priority: updates.priority ?? todo.priority,
+    description: updates.description ?? todo.description,
+    image_url: updates.image_url ?? todo.image_url
+  })
+}
                 />
               ))
             ) : (

@@ -1,3 +1,4 @@
+import { type Todo } from "~/types/todo";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { createClient } from "~/utils/supabase/server";
@@ -12,7 +13,7 @@ export const todoRouter = createTRPCRouter({
       .order("created_at", { ascending: false });
     
     if (error) throw new Error(error.message);
-    return data;
+    return data as Todo[];
   }),
 
   //Add Todo 
@@ -38,7 +39,7 @@ export const todoRouter = createTRPCRouter({
         .select();
 
       if (error) throw new Error(error.message);
-      return data;
+      return data as Todo[];
     }),
 
   //Update Todo (Allowing all fields to be updated)
@@ -62,7 +63,7 @@ export const todoRouter = createTRPCRouter({
         .select();
 
       if (error) throw new Error(error.message);
-      return data;
+      return data as Todo[];
     }),
 
   //Delete Todo
