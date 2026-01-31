@@ -49,8 +49,6 @@ Create a .env file in the root directory and add your Supabase credentials
 NEXT_PUBLIC_SUPABASE_URL=your_project_url
 
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 ### Database Setup
 Run the following SQL in your Supabase SQL Editor to enable RLS
