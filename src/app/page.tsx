@@ -40,13 +40,22 @@ const AuthPage = () => {
     
     try {
       if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({ 
+        const { data, error } = await supabase.auth.signUp({ 
           email, 
           password,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
         });
+
         if (error) throw error;
-        toast.success('Check your email to confirm your account!');
+
+        // Check if Supabase returned a session 
+        if (data.session) {
+          toast.success('Account created! Welcome to Taskly.');
+          router.push('/todos');
+          router.refresh();
+        } else {
+          // if turn confirmation back on
+          toast.success('Check your email to confirm your account!');
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
